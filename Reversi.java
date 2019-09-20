@@ -1,14 +1,17 @@
 import java.util.ArrayList; 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
 
-public class Reversi 
+public class Reversi extends Application implements EventHandler<>
 {
     public static int boardSize = 8; 
     public static TileValue[][] board = new TileValue[boardSize][boardSize]; 
     public static ArrayList <CoOrd> legalMoves = new ArrayList<CoOrd>();;  
-    public static CoOrd move;
     public static TileValue turnColour = TileValue.BLACK;
 
     public enum TileValue 
@@ -32,15 +35,24 @@ public class Reversi
 
     public static void main(String[] args)
     {
+        launch(args);
         initaliseBoard(); 
         printBoard(); 
-
-
         calculateLegalMoves();
         printLegalMoves();
 
     }
 
+    @Override
+    public void start(Stage primaryStage) throws Exception
+    {
+        primaryStage.setTitle("Reversi");
+        StackPane layout = new StackPane();
+        Scene scene = new Scene(layout, 1600,900);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+    
     public static void initaliseBoard()
     {
         for (int y = 0; y < boardSize; y++ )
@@ -131,12 +143,12 @@ public class Reversi
             finishedSearching = true;
         }
         //legal moves requirement met therefore continue going in that direction until empty slot
-        Boolean firstCheck= false;
+        Boolean oppositeAdjacentColour= false;
         while(!finishedSearching)
         {
             x+=xDelta;
             y+=yDelta;
-            if(board[y][x] == TileValue.EMPTY && firstCheck== true)
+            if(board[y][x] == TileValue.EMPTY && oppositeAdjacentColour== true)
             {
                 return new CoOrd(y,x);
             }
@@ -151,7 +163,7 @@ public class Reversi
             }
             if(board[y][x]== turnColour.oppositeColour())
             {
-                firstCheck = true;
+                oppositeAdjacentColour = true;
             }
             if(x<0 || x >=boardSize || y <0 || y >= boardSize)
             {
