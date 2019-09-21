@@ -7,7 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-public class Reversi extends Application implements EventHandler<>
+public class Reversi extends Application implements EventHandler<ActionEvent>
 {
     public static int boardSize = 8; 
     public static TileValue[][] board = new TileValue[boardSize][boardSize]; 
@@ -36,10 +36,7 @@ public class Reversi extends Application implements EventHandler<>
     public static void main(String[] args)
     {
         launch(args);
-        initaliseBoard(); 
-        printBoard(); 
-        calculateLegalMoves();
-        printLegalMoves();
+
 
     }
 
@@ -51,6 +48,16 @@ public class Reversi extends Application implements EventHandler<>
         Scene scene = new Scene(layout, 1600,900);
         primaryStage.setScene(scene);
         primaryStage.show();
+        initaliseBoard(); 
+        printBoard(); 
+        calculateLegalMoves();
+        printLegalMoves();
+    }
+
+    @Override
+    public void handle(ActionEvent event)
+    {
+
     }
     
     public static void initaliseBoard()
@@ -83,9 +90,13 @@ public class Reversi extends Application implements EventHandler<>
 
     public static void printLegalMoves()
     {
-        for (int i =0; i<legalMoves.size(); i++)
+
+        if(legalMoves.size() != 0)
         {
-            System.out.println(legalMoves.get(i).first + " " + legalMoves.get(i).last );
+            for (int i =0; i<legalMoves.size(); i++)
+            {
+                System.out.println(legalMoves.get(i).first + " " + legalMoves.get(i).last );
+            }
         }
     }
 
@@ -110,6 +121,16 @@ public class Reversi extends Application implements EventHandler<>
                 addLegalMove(traverseDirection(y,x,1,-1));
                 addLegalMove(traverseDirection(y,x,0,-1));
                 addLegalMove(traverseDirection(y,x,-1,-1));
+                /*for(int i = -1; i <=1; i++)
+                {
+                    for(int j= -1; j<=1; j++)
+                    {
+                        if (!(i == 0 && j == 0 && i == j))
+                        {
+                            addLegalMove(traverseDirection(y,x,i,j));
+                        }
+                    }
+                }*/
             }
         }
     }
@@ -148,6 +169,10 @@ public class Reversi extends Application implements EventHandler<>
         {
             x+=xDelta;
             y+=yDelta;
+            if(x<0 || x >=boardSize || y <0 || y >= boardSize)
+            {
+                return null;
+            }
             if(board[y][x] == TileValue.EMPTY && oppositeAdjacentColour== true)
             {
                 return new CoOrd(y,x);
@@ -165,10 +190,7 @@ public class Reversi extends Application implements EventHandler<>
             {
                 oppositeAdjacentColour = true;
             }
-            if(x<0 || x >=boardSize || y <0 || y >= boardSize)
-            {
-                return null;
-            }
+
 
         }
         return null;
