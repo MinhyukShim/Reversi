@@ -307,7 +307,11 @@ public class Reversi extends Application
         {
             x+=xDelta;
             y+=yDelta;
-            if(board[y][x] == turnColour)
+            if(x<0 || x >=boardSize || y <0 || y >= boardSize)
+            {
+                return;
+            }
+            else if(board[y][x] == turnColour)
             {
                 sameColourFound = true;
             }
