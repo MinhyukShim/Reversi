@@ -75,7 +75,7 @@ public class Reversi extends Application implements EventHandler<ActionEvent>
         initaliseBoard(); 
         root = printBoard(root); 
         calculateLegalMoves();
-        printLegalMoves();
+        root = printLegalMoves(root);
     }
 
     @Override
@@ -126,20 +126,30 @@ public class Reversi extends Application implements EventHandler<ActionEvent>
         return group;
     }
 
-    public static void printLegalMoves()
+    public static Group printLegalMoves(Group group)
     {
 
         if(legalMoves.size() != 0)
         {
             for (int i =0; i<legalMoves.size(); i++)
             {
-                System.out.println(legalMoves.get(i).first + " " + legalMoves.get(i).last );
+                Circle circle = new Circle((legalMoves.get(i).first+0.5)*tileSize, (legalMoves.get(i).last+0.5)*tileSize, tileSize*0.45);
+                if(turnColour==TileValue.WHITE)
+                {
+                    circle.setFill(Color.rgb(255,255,255,0.4));
+                }
+                else
+                {
+                    circle.setFill(Color.rgb(0,0,0,0.4));
+                }
+                group.getChildren().add(circle);
             }
         }
         else
         {
             System.out.println("No legal moves!");
         }
+        return group;
     }
 
     public static void calculateLegalMoves()
