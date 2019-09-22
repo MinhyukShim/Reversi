@@ -8,6 +8,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Circle;
 import javafx.scene.Group; 
 import javafx.scene.paint.Color; 
 
@@ -17,7 +18,8 @@ public class Reversi extends Application implements EventHandler<ActionEvent>
     public static TileValue[][] board = new TileValue[boardSize][boardSize]; 
     public static ArrayList <CoOrd> legalMoves = new ArrayList<CoOrd>();;  
     public static TileValue turnColour = TileValue.BLACK;
-
+    public static int boardSizePixels = 900;
+    public static int tileSize = boardSizePixels/boardSize;
     public enum TileValue 
     {
         EMPTY, BLACK, WHITE;
@@ -48,15 +50,30 @@ public class Reversi extends Application implements EventHandler<ActionEvent>
     public void start(Stage primaryStage) throws Exception
     {
         primaryStage.setTitle("Reversi");
-        Rectangle rectangle = new Rectangle(0, 0, 900, 900);
-        Line line = new Line(125, 0, 125, 900);
+
+        Rectangle rectangle = new Rectangle(0, 0, boardSizePixels, boardSizePixels);
         rectangle.setFill(Color.GREEN); 
-        Group root = new Group(rectangle,line);
+        Group root = new Group(rectangle);
+        for (int i =1; i<=8; i++)
+        {
+            int lineWidth = 10;
+            Line line = new Line(tileSize*i, 0, tileSize*i, boardSizePixels-(lineWidth/2));
+            Line line2 = new Line(0,tileSize*i, boardSizePixels-(lineWidth/2), tileSize*i);
+            line.setStrokeWidth(lineWidth);
+            line2.setStrokeWidth(lineWidth);
+            line.setStroke(Color.rgb(50, 50, 50));
+            line2.setStroke(Color.rgb(50, 50, 50));
+            root.getChildren().add(line);
+            root.getChildren().add(line2);
+        }
+        
+
+
         Scene scene = new Scene(root, 1920,1080);
         primaryStage.setScene(scene);
         primaryStage.show();
         initaliseBoard(); 
-        printBoard(); 
+        root = printBoard(root); 
         calculateLegalMoves();
         printLegalMoves();
     }
@@ -85,16 +102,28 @@ public class Reversi extends Application implements EventHandler<ActionEvent>
         board[midpoint + 1][midpoint + 1] = TileValue.WHITE; 
     }
 
-    public static void printBoard()
+    public static Group printBoard(Group group)
     {
         for (int y = 0; y < boardSize; y++ )
         {
             for (int x = 0; x < boardSize; x++ )
             {
-                System.out.print(board[y][x] + " "); 
+                if(board[y][x] == TileValue.WHITE)
+                {
+                    Circle circle = new Circle((x+0.5)*tileSize, (y+0.5)*tileSize, tileSize*0.45); 
+                    circle.setFill(Color.WHITE);
+                    group.getChildren().add(circle);
+                }
+                else if(board[y][x] == TileValue.BLACK)                    
+                {
+                    Circle circle = new Circle((x+0.5)*tileSize, (y+0.5)*tileSize, tileSize*0.45); 
+                    circle.setFill(Color.BLACK);
+                    group.getChildren().add(circle);
+                
+                }
             }
-            System.out.println(" "); 
         }
+        return group;
     }
 
     public static void printLegalMoves()
