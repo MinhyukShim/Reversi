@@ -45,7 +45,7 @@ public class Reversi extends Application
         root = drawBoard(root);
         
 
-        root.getChildren().add( legalMovesGroup );
+        root.getChildren().addAll( legalMovesGroup );
         Scene scene = new Scene(root, 1920,1080);
 
         primaryStage.setScene(scene);
@@ -140,7 +140,7 @@ public class Reversi extends Application
 
     public static Group printLegalMoves(Group group)
     {
-        root.getChildren().remove( group );
+        root.getChildren().removeAll( group );
         group.getChildren().clear();
         if(legalMoves.size() != 0)
         {
@@ -175,7 +175,7 @@ public class Reversi extends Application
         //if different colour then check next until same colour or empty is found
         // if same colour then add origin to legal move  otherwise dont
         //repeat for each direction  
-
+        legalMoves.clear();
         for (int y = 0; y < boardSize; y++ )
         {
             for (int x = 0; x < boardSize; x++ )
@@ -243,7 +243,7 @@ public class Reversi extends Application
             //a legal move requires the opposite colour's piece inbetween the potential spot and an already placed piece
             if(board[y][x] == TileValue.EMPTY && oppositeAdjacentColour== true)
             {
-                return new CoOrd(y,x);
+                return new CoOrd(x,y);
             }
             else if(board[y][x] == TileValue.EMPTY)
             {
