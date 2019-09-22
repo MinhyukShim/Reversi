@@ -11,33 +11,20 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Circle;
 import javafx.scene.Group; 
 import javafx.scene.paint.Color; 
-
-public class Reversi extends Application implements EventHandler<ActionEvent>
+import javafx.scene.input.MouseEvent;
+public class Reversi extends Application
 {
     public static int boardSize = 8; 
     public static TileValue[][] board = new TileValue[boardSize][boardSize]; 
     public static ArrayList <CoOrd> legalMoves = new ArrayList<CoOrd>();;  
     public static TileValue turnColour = TileValue.BLACK;
+    public static Boolean blackStuck = false;
+    public static Boolean whiteStuck = false;
+    public static Group root = new Group();
+    public static Group legalMovesGroup = new Group();
+
     public static int boardSizePixels = 900;
     public static int tileSize = boardSizePixels/boardSize;
-    public enum TileValue 
-    {
-        EMPTY, BLACK, WHITE;
-
-        public TileValue oppositeColour()
-        {
-            if(this == TileValue.BLACK)
-            {
-                return TileValue.WHITE;
-            }
-            else if(this == TileValue.WHITE)
-            {
-                return TileValue.BLACK;
-            }
-            return TileValue.EMPTY;
-            
-        }
-    }
 
     public static void main(String[] args)
     {
@@ -53,7 +40,45 @@ public class Reversi extends Application implements EventHandler<ActionEvent>
 
         Rectangle rectangle = new Rectangle(0, 0, boardSizePixels, boardSizePixels);
         rectangle.setFill(Color.GREEN); 
-        Group root = new Group(rectangle);
+        root.getChildren().add(rectangle);
+       
+        root = drawBoard(root);
+        
+
+        root.getChildren().add( legalMovesGroup );
+        Scene scene = new Scene(root, 1920,1080);
+
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        initaliseBoard(); 
+        root = printBoard(root); 
+
+        root.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                //System.out.println(event.getSceneX());
+                //System.out.println(event.getSceneY());
+                CoOrd test = mousePositionToCoOrds(event.getSceneX(),event.getSceneY());
+                System.out.println(test.first+ " AWRQR" + test.last);
+                updateBoard(test);
+                root = printBoard(root);
+                calculateLegalMoves();
+                legalMovesGroup = printLegalMoves(legalMovesGroup);
+                root.getChildren().add( legalMovesGroup );
+
+            }
+        });
+
+
+
+        calculateLegalMoves();
+        legalMovesGroup = printLegalMoves(legalMovesGroup);
+        
+    }
+
+    
+    public static Group drawBoard(Group group)
+    {
         for (int i =1; i<=8; i++)
         {
             int lineWidth = 10;
@@ -63,27 +88,12 @@ public class Reversi extends Application implements EventHandler<ActionEvent>
             line2.setStrokeWidth(lineWidth);
             line.setStroke(Color.rgb(50, 50, 50));
             line2.setStroke(Color.rgb(50, 50, 50));
-            root.getChildren().add(line);
-            root.getChildren().add(line2);
+            group.getChildren().add(line);
+            group.getChildren().add(line2);
         }
-        
-
-
-        Scene scene = new Scene(root, 1920,1080);
-        primaryStage.setScene(scene);
-        primaryStage.show();
-        initaliseBoard(); 
-        root = printBoard(root); 
-        calculateLegalMoves();
-        root = printLegalMoves(root);
+        return group;
     }
 
-    @Override
-    public void handle(ActionEvent event)
-    {
-
-    }
-    
     public static void initaliseBoard()
     {
         for (int y = 0; y < boardSize; y++ )
@@ -121,18 +131,22 @@ public class Reversi extends Application implements EventHandler<ActionEvent>
                     group.getChildren().add(circle);
                 
                 }
+                System.out.print(board[y][x] + " ");
             }
+            System.out.println(" ");
         }
         return group;
     }
 
     public static Group printLegalMoves(Group group)
     {
-
+        root.getChildren().remove( group );
+        group.getChildren().clear();
         if(legalMoves.size() != 0)
         {
             for (int i =0; i<legalMoves.size(); i++)
             {
+                System.out.println(legalMoves.get(i).first + " " + legalMoves.get(i).last );
                 Circle circle = new Circle((legalMoves.get(i).first+0.5)*tileSize, (legalMoves.get(i).last+0.5)*tileSize, tileSize*0.45);
                 if(turnColour==TileValue.WHITE)
                 {
@@ -142,6 +156,7 @@ public class Reversi extends Application implements EventHandler<ActionEvent>
                 {
                     circle.setFill(Color.rgb(0,0,0,0.4));
                 }
+                
                 group.getChildren().add(circle);
             }
         }
@@ -250,8 +265,71 @@ public class Reversi extends Application implements EventHandler<ActionEvent>
     }
 
 
+    public static CoOrd mousePositionToCoOrds(double x, double y)
+    {
+        int tileX = (int)x/tileSize;
+        int tileY = (int)y/tileSize;
 
+        return new CoOrd(tileX, tileY);
+    }
 
+    public static void updateBoard(CoOrd click)
+    {
+        if(legalMoves.contains(click))
+        {
+            System.out.println("???");
+            board[click.last][click.first] = turnColour;
+            capturePieces(click);
+        }
 
+    }
+
+    public static void capturePieces(CoOrd click)
+    {
+        int y = click.last;
+        int x = click.first;
+        traverseCapture(y,x,-1,0);
+        traverseCapture(y,x,-1,1);
+        traverseCapture(y,x,0,1);
+        traverseCapture(y,x,1,1);
+        traverseCapture(y,x,1,0);
+        traverseCapture(y,x,1,-1);
+        traverseCapture(y,x, 0,-1);
+        traverseCapture(y,x,-1,-1);
+        turnColour = turnColour.oppositeColour();
+
+    }
+    
+    public static void  traverseCapture(int y,int x, int yDelta, int xDelta)
+    {
+        Boolean sameColourFound = false;
+        while(!sameColourFound)
+        {
+            x+=xDelta;
+            y+=yDelta;
+            if(board[y][x] == turnColour)
+            {
+                sameColourFound = true;
+            }
+        }
+        yDelta = yDelta*-1;
+        xDelta = xDelta*-1;
+        sameColourFound=false;
+        while(!sameColourFound)
+        {
+            x+=xDelta;
+            y+=yDelta;
+            if(board[y][x] == turnColour.oppositeColour())
+            {
+                board[y][x]= turnColour;
+            }
+            else
+            {
+                sameColourFound = true;
+            }
+        }
+
+        
+    }
 }
 
