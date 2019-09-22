@@ -6,6 +6,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Line;
+import javafx.scene.Group; 
+import javafx.scene.paint.Color; 
 
 public class Reversi extends Application implements EventHandler<ActionEvent>
 {
@@ -44,8 +48,11 @@ public class Reversi extends Application implements EventHandler<ActionEvent>
     public void start(Stage primaryStage) throws Exception
     {
         primaryStage.setTitle("Reversi");
-        StackPane layout = new StackPane();
-        Scene scene = new Scene(layout, 1600,900);
+        Rectangle rectangle = new Rectangle(0, 0, 900, 900);
+        Line line = new Line(125, 0, 125, 900);
+        rectangle.setFill(Color.GREEN); 
+        Group root = new Group(rectangle,line);
+        Scene scene = new Scene(root, 1920,1080);
         primaryStage.setScene(scene);
         primaryStage.show();
         initaliseBoard(); 
@@ -69,6 +76,8 @@ public class Reversi extends Application implements EventHandler<ActionEvent>
                 board[y][x] = TileValue.EMPTY; 
             }
         }
+
+        //place the pieces in the middle.
         int midpoint = (boardSize / 2) - 1; 
         board[midpoint][midpoint] = TileValue.WHITE; 
         board[midpoint][midpoint + 1] = TileValue.BLACK; 
@@ -97,6 +106,10 @@ public class Reversi extends Application implements EventHandler<ActionEvent>
             {
                 System.out.println(legalMoves.get(i).first + " " + legalMoves.get(i).last );
             }
+        }
+        else
+        {
+            System.out.println("No legal moves!");
         }
     }
 
@@ -137,15 +150,11 @@ public class Reversi extends Application implements EventHandler<ActionEvent>
 
     public static void addLegalMove(CoOrd move)
     {
-        if(move != null)
+
+        //might need to change the legalMoves data structure to a set to as the contains function will take much longer when scaled upwards
+        if(move != null && !legalMoves.contains(move))
         {
-            if(legalMoves != null)
-            {
-                if(!legalMoves.contains(move))
-                {
-                    legalMoves.add(move);
-                }
-            }
+            legalMoves.add(move);
         }
     }
 
@@ -167,12 +176,17 @@ public class Reversi extends Application implements EventHandler<ActionEvent>
         Boolean oppositeAdjacentColour= false;
         while(!finishedSearching)
         {
+            //move in direction
             x+=xDelta;
             y+=yDelta;
+
+            //check if out of bounds
             if(x<0 || x >=boardSize || y <0 || y >= boardSize)
             {
                 return null;
             }
+            
+            //a legal move requires the opposite colour's piece inbetween the potential spot and an already placed piece
             if(board[y][x] == TileValue.EMPTY && oppositeAdjacentColour== true)
             {
                 return new CoOrd(y,x);
