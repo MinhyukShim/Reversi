@@ -16,13 +16,19 @@ public class Reversi extends Application
 {
     public static int boardSize = 8; 
     public static TileValue[][] board = new TileValue[boardSize][boardSize]; 
-    public static ArrayList <CoOrd> legalMoves = new ArrayList<CoOrd>();;  
+    public static ArrayList <CoOrd> legalMoves = new ArrayList<CoOrd>(); 
     public static TileValue turnColour = TileValue.BLACK;
     public static Boolean blackStuck = false;
     public static Boolean whiteStuck = false;
     public static Group root = new Group();
     public static Group legalMovesGroup = new Group();
     public static int numberOfTurns = 0;
+
+
+    public static Players playerBlack = Players.Random;
+    public static Players playerWhite = Players.Human;
+
+    public Random randomPlayer = new Random();
 
     public static int boardSizePixels = 900;
     public static int tileSize = boardSizePixels/boardSize;
@@ -46,28 +52,41 @@ public class Reversi extends Application
         root = drawBoard(root);
         
 
+
+        initaliseBoard(); 
+        root = printBoard(root); 
+        calculateLegalMoves();
+        legalMovesGroup = displayLegalMoves(legalMovesGroup);
         root.getChildren().addAll( legalMovesGroup );
         Scene scene = new Scene(root, 1920,1080);
 
         primaryStage.setScene(scene);
         primaryStage.show();
-        initaliseBoard(); 
-        root = printBoard(root); 
-        calculateLegalMoves();
-        legalMovesGroup = displayLegalMoves(legalMovesGroup);
 
         root.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
+                if(playerBlack == Players.Human && turnColour == TileValue.BLACK)
+                {
+                    humanController(event);
+                }
+                else if(playerWhite == Players.Human && turnColour == TileValue.WHITE )
+                {
+                    humanController(event);
+                }
+                else if(playerBlack == Players.Random && turnColour == TileValue.BLACK )
+                {
+                    CoOrd move = randomPlayer.chooseRandom(legalMoves);
+                    updateBoard(move);
+                    root = printBoard(root);
+                    calculateLegalMoves();
+                    legalMovesGroup = displayLegalMoves(legalMovesGroup);
+                    root.getChildren().add( legalMovesGroup );
+                    countPieces();
+                    checkTurnState();
+                }
 
-                CoOrd test = mousePositionToCoOrds(event.getSceneX(),event.getSceneY());
-                updateBoard(test);
-                root = printBoard(root);
-                calculateLegalMoves();
-                legalMovesGroup = displayLegalMoves(legalMovesGroup);
-                root.getChildren().add( legalMovesGroup );
-                countPieces();
-                checkTurnState();
+
             }
         });
 
@@ -75,6 +94,20 @@ public class Reversi extends Application
 
 
         
+    }
+
+    public static void humanController(MouseEvent event)
+    {
+        CoOrd click = mousePositionToCoOrds(event.getSceneX(),event.getSceneY());
+        if(updateBoard(click))
+        {
+            root = printBoard(root);
+            calculateLegalMoves();
+            legalMovesGroup = displayLegalMoves(legalMovesGroup);
+            root.getChildren().add( legalMovesGroup );
+            countPieces();
+            checkTurnState();
+        }
     }
 
     public static void checkTurnState()
@@ -328,11 +361,10 @@ public class Reversi extends Application
         return new CoOrd(tileX, tileY);
     }
 
-    public static void updateBoard(CoOrd click)
+    public static Boolean updateBoard(CoOrd click)
     {
         if(legalMoves.contains(click))
         {
-            System.out.println("???");
             numberOfTurns++;
             if(numberOfTurns==boardSize*boardSize-4)
             {
@@ -340,7 +372,9 @@ public class Reversi extends Application
             }
             board[click.last][click.first] = turnColour;
             capturePieces(click);
+            return true;
         }
+        return false;
 
     }
 
