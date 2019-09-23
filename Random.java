@@ -11,7 +11,7 @@ public class Random
         int numberOfMoves = legalMoves.size();
         if (numberOfMoves>0)
         {
-            int x = (int)(Math.random()*(numberOfMoves+1));
+            int x = (int)(Math.random()*(numberOfMoves));
             return legalMoves.get(x);
         }
         return null;

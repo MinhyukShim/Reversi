@@ -12,6 +12,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.Group; 
 import javafx.scene.paint.Color; 
 import javafx.scene.input.MouseEvent;
+import javafx.scene.text.*;
 public class Reversi extends Application
 {
     public static int boardSize = 8; 
@@ -23,12 +24,13 @@ public class Reversi extends Application
     public static Group root = new Group();
     public static Group legalMovesGroup = new Group();
     public static int numberOfTurns = 0;
+    public static int whitePieces = 0;
+    public static int blackPieces = 0;
 
+    public static Players playerBlack = Players.Human;
+    public static Players playerWhite = Players.Random;
 
-    public static Players playerBlack = Players.Random;
-    public static Players playerWhite = Players.Human;
-
-    public Random randomPlayer = new Random();
+    public static Random randomPlayer = new Random();
 
     public static int boardSizePixels = 900;
     public static int tileSize = boardSizePixels/boardSize;
@@ -50,8 +52,19 @@ public class Reversi extends Application
         root.getChildren().add(rectangle);
        
         root = drawBoard(root);
-        
+        Text t = new Text();
+        t.setFont(new Font(40));
+        t.setText("White pieces: " + whitePieces + "\nBlack pieces: " + blackPieces);
+        t.setX(1000);
+        t.setY(100);
+        root.getChildren().add(t);
 
+        Text whosTurn = new Text();
+        whosTurn.setFont(new Font(40));
+        whosTurn.setText("Black's Turn");
+        whosTurn.setX(1000);
+        whosTurn.setY(300);
+        root.getChildren().add(whosTurn);
 
         initaliseBoard(); 
         root = printBoard(root); 
@@ -66,6 +79,7 @@ public class Reversi extends Application
         root.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
+                
                 if(playerBlack == Players.Human && turnColour == TileValue.BLACK)
                 {
                     humanController(event);
@@ -76,17 +90,22 @@ public class Reversi extends Application
                 }
                 else if(playerBlack == Players.Random && turnColour == TileValue.BLACK )
                 {
-                    CoOrd move = randomPlayer.chooseRandom(legalMoves);
-                    updateBoard(move);
-                    root = printBoard(root);
                     calculateLegalMoves();
-                    legalMovesGroup = displayLegalMoves(legalMovesGroup);
-                    root.getChildren().add( legalMovesGroup );
-                    countPieces();
-                    checkTurnState();
+                    randomController();
                 }
-
-
+                else if (playerWhite == Players.Random && turnColour == TileValue.WHITE )
+                {
+                    calculateLegalMoves();
+                    randomController();
+                }
+                t.setText("White pieces: " + whitePieces + "\nBlack pieces: " + blackPieces);
+                if(turnColour == TileValue.WHITE)
+                {
+                    whosTurn.setText("White's Turn");
+                }
+                else{
+                    whosTurn.setText("Black's Turn");
+                }
             }
         });
 
@@ -99,7 +118,19 @@ public class Reversi extends Application
     public static void humanController(MouseEvent event)
     {
         CoOrd click = mousePositionToCoOrds(event.getSceneX(),event.getSceneY());
-        if(updateBoard(click))
+        updateMove(click);
+    }
+
+    public static void randomController()
+    {
+        CoOrd move = randomPlayer.chooseRandom(legalMoves);
+        updateMove(move);
+                
+    }
+
+    public static void updateMove(CoOrd move)
+    {
+        if (updateBoard(move))
         {
             root = printBoard(root);
             calculateLegalMoves();
@@ -108,20 +139,22 @@ public class Reversi extends Application
             countPieces();
             checkTurnState();
         }
+        else
+        {
+            checkTurnState();
+        }
     }
 
     public static void checkTurnState()
     {
-        if (blackStuck== true && whiteStuck == true)
-        {
-            countPieces();
-        }
+
         if (turnColour== TileValue.BLACK)
         {
             if (legalMoves.isEmpty())
             {
                 blackStuck= true;
-                turnColour.oppositeColour();
+                turnColour = turnColour.oppositeColour();
+                calculateLegalMoves();
             }
             else
             {
@@ -133,23 +166,40 @@ public class Reversi extends Application
             if (legalMoves.isEmpty())
             {
                 whiteStuck= true;
-                turnColour.oppositeColour();
+                turnColour = turnColour.oppositeColour();
+                calculateLegalMoves();
             }
             else
             {
                 whiteStuck = false;
             } 
         }
+        if (blackStuck== true && whiteStuck == true)
+        {
+            countPieces();
+            if (whitePieces>blackPieces)
+            {
+                System.out.println("White wins");
+            }
+            else if (blackPieces>whitePieces)
+            {
+                System.out.println("Black wins");   
+            }
+            else
+            {
+                System.out.println("Draw!");
+            }
+        }
 
     }
 
     public static void countPieces()
     {
-        int whitePieces = 0;
-        int blackPieces = 0;
-        for (int x = 0; x<8; x++)
+        whitePieces = 0;
+        blackPieces = 0;
+        for (int x = 0; x<boardSize; x++)
         {
-            for (int y = 0; y<8; y++)
+            for (int y = 0; y<boardSize; y++)
             {
                 if(board[y][x] == TileValue.WHITE)
                 {
@@ -250,7 +300,7 @@ public class Reversi extends Application
         }
         else
         {
-            System.out.println("No legal moves!");
+            System.out.println("No legal moves! " + turnColour );
         }
         return group;
     }
@@ -365,11 +415,6 @@ public class Reversi extends Application
     {
         if(legalMoves.contains(click))
         {
-            numberOfTurns++;
-            if(numberOfTurns==boardSize*boardSize-4)
-            {
-                countPieces();
-            }
             board[click.last][click.first] = turnColour;
             capturePieces(click);
             return true;
@@ -408,6 +453,10 @@ public class Reversi extends Application
             else if(board[y][x] == turnColour)
             {
                 sameColourFound = true;
+            }
+            else if(board[y][x] == TileValue.EMPTY)
+            {
+                return;
             }
         }
         yDelta = yDelta*-1;
