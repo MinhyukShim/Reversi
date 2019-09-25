@@ -27,8 +27,8 @@ public class Reversi extends Application
     public static int whitePieces = 2;
     public static int blackPieces = 2;
 
-    public static Players playerBlack = Players.Random;
-    public static Players playerWhite = Players.Random;
+    public static Players playerBlack = Players.Human;
+    public static Players playerWhite = Players.Human;
 
     public static Random randomPlayer = new Random();
 
