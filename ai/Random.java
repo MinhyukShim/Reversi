@@ -1,3 +1,5 @@
+package ai;
+
 import java.util.ArrayList;
 
 public class Random

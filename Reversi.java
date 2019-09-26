@@ -1,3 +1,4 @@
+
 import java.util.ArrayList; 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -13,6 +14,7 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color; 
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.*;
+import ai.*;
 public class Reversi extends Application
 {
     public static int boardSize = 8; 
@@ -21,16 +23,21 @@ public class Reversi extends Application
     public static TileValue turnColour = TileValue.BLACK;
     public static Boolean blackStuck = false;
     public static Boolean whiteStuck = false;
+    
     public static Group root = new Group();
     public static Group legalMovesGroup = new Group();
-    public static int numberOfTurns = 0;
+    
+    public static Text whosTurn = new Text();
+    public static Text t = new Text();
+
     public static int whitePieces = 2;
     public static int blackPieces = 2;
 
-    public static Players playerBlack = Players.Human;
-    public static Players playerWhite = Players.Human;
+    public static Players playerBlack = Players.Random;
+    public static Players playerWhite = Players.Random;
 
     public static Random randomPlayer = new Random();
+
 
     public static int boardSizePixels = 900;
     public static int tileSize = boardSizePixels/boardSize;
@@ -52,14 +59,14 @@ public class Reversi extends Application
         root.getChildren().add(rectangle);
        
         root = drawBoard(root);
-        Text t = new Text();
+
         t.setFont(new Font(40));
         t.setText("White pieces: " + whitePieces + "\nBlack pieces: " + blackPieces);
         t.setX(1000);
         t.setY(100);
         root.getChildren().add(t);
 
-        Text whosTurn = new Text();
+
         whosTurn.setFont(new Font(40));
         whosTurn.setText("Black's Turn");
         whosTurn.setX(1000);
@@ -67,8 +74,7 @@ public class Reversi extends Application
         root.getChildren().add(whosTurn);
 
         initaliseBoard(); 
-        root = printBoard(root); 
-        calcAndDrawLegalMoves();
+
         Scene scene = new Scene(root, 1920,1080);
 
         primaryStage.setScene(scene);
@@ -77,31 +83,17 @@ public class Reversi extends Application
         root.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                
-                if(playerBlack == Players.Human && turnColour == TileValue.BLACK)
+                if(turnColour==TileValue.WHITE)
                 {
-                    humanController(event);
+                    handleTurn(playerWhite,event);
                 }
-                else if(playerWhite == Players.Human && turnColour == TileValue.WHITE )
+                else
                 {
-                    humanController(event);
+                    handleTurn(playerBlack,event);
                 }
-                else if(playerBlack == Players.Random && turnColour == TileValue.BLACK )
-                {
-                    randomController();
-                }
-                else if (playerWhite == Players.Random && turnColour == TileValue.WHITE )
-                {
-                    randomController();
-                }
-                t.setText("White pieces: " + whitePieces + "\nBlack pieces: " + blackPieces);
-                if(turnColour == TileValue.WHITE)
-                {
-                    whosTurn.setText("White's Turn");
-                }
-                else{
-                    whosTurn.setText("Black's Turn");
-                }
+                updateText();
+
+
             }
         });
 
@@ -110,6 +102,33 @@ public class Reversi extends Application
 
         
     }
+
+    public static void updateText()
+    {
+        t.setText("White pieces: " + whitePieces + "\nBlack pieces: " + blackPieces);
+        if(turnColour == TileValue.WHITE)
+        {
+            whosTurn.setText("White's Turn");
+        }
+        else{
+            whosTurn.setText("Black's Turn");
+        }
+    }
+
+    public static void handleTurn(Players player, MouseEvent event)
+    {
+        switch(player)
+        {
+            case Human:
+                humanController(event);
+                break;
+            case Random:
+                randomController();
+                break;
+        }
+    }
+
+
 
     public static void humanController(MouseEvent event)
     {
@@ -257,6 +276,8 @@ public class Reversi extends Application
         board[midpoint][midpoint + 1] = TileValue.BLACK; 
         board[midpoint + 1][midpoint] = TileValue.BLACK; 
         board[midpoint + 1][midpoint + 1] = TileValue.WHITE; 
+        root = printBoard(root); 
+        calcAndDrawLegalMoves();
     }
 
     public static Group printBoard(Group group)

@@ -1,3 +1,5 @@
+    package ai;
+    
     public class CoOrd 
     {
         public int first; 
@@ -23,7 +25,7 @@
             return false; 
         } 
           
-        // typecast o to Complex so that we can compare data members  
+        // typecast o to CoOrd so that we can compare data members  
         CoOrd c = (CoOrd) o; 
           
         if (c.first == this.first && c.last == this.last)
