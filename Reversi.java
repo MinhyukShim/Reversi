@@ -1,11 +1,8 @@
 
 import java.util.ArrayList; 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Line;
@@ -33,7 +30,7 @@ public class Reversi extends Application
     public static int whitePieces = 2;
     public static int blackPieces = 2;
 
-    public static Players playerBlack = Players.Random;
+    public static Players playerBlack = Players.Greedy;
     public static Players playerWhite = Players.Greedy;
 
     public static Random randomPlayer = new Random();
@@ -41,6 +38,7 @@ public class Reversi extends Application
 
     public static int boardSizePixels = 900;
     public static int tileSize = boardSizePixels/boardSize;
+    public static int counterLimit = boardSize*boardSize;
 
     public static void main(String[] args)
     {
@@ -133,7 +131,8 @@ public class Reversi extends Application
 
     public static void greedyController()
     {
-       updateMove(greedyPlayer.returnGreedyMove(legalMoves,board)); 
+        CoOrd move = greedyPlayer.returnGreedyMove(legalMoves,board,turnColour);
+        updateMove(move); 
     }
 
 
@@ -157,13 +156,8 @@ public class Reversi extends Application
             root = printBoard(root);
             calcAndDrawLegalMoves();
             
-        
-            checkTurnState();
         }
-        else
-        {
-            checkTurnState();
-        }
+        checkTurnState();
     }
 
     public static void calcAndDrawLegalMoves()
@@ -178,7 +172,9 @@ public class Reversi extends Application
     {
         checkLegalMovesForColour();
         
-        if (blackStuck== true && whiteStuck == true)
+
+
+        if (blackStuck== true && whiteStuck == true || blackPieces+whitePieces >= counterLimit)
         {
             if (whitePieces>blackPieces)
             {
@@ -226,7 +222,6 @@ public class Reversi extends Application
             } 
         }
     }
-
 
 
     public static Group drawBoard(Group group)
@@ -341,16 +336,6 @@ public class Reversi extends Application
                 addLegalMove(traverseDirection(y,x,1,-1));
                 addLegalMove(traverseDirection(y,x,0,-1));
                 addLegalMove(traverseDirection(y,x,-1,-1));
-                /*for(int i = -1; i <=1; i++)
-                {
-                    for(int j= -1; j<=1; j++)
-                    {
-                        if (!(i == 0 && j == 0 && i == j))
-                        {
-                            addLegalMove(traverseDirection(y,x,i,j));
-                        }
-                    }
-                }*/
             }
         }
     }
