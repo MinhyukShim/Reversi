@@ -1,3 +1,5 @@
+package ai;
+
 public enum TileValue 
 {
         EMPTY, BLACK, WHITE;

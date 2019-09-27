@@ -28,16 +28,16 @@ public class Reversi extends Application
     public static Group legalMovesGroup = new Group();
     
     public static Text whosTurn = new Text();
-    public static Text t = new Text();
+    public static Text pieceText = new Text();
 
     public static int whitePieces = 2;
     public static int blackPieces = 2;
 
     public static Players playerBlack = Players.Random;
-    public static Players playerWhite = Players.Random;
+    public static Players playerWhite = Players.Greedy;
 
     public static Random randomPlayer = new Random();
-
+    public static Greedy greedyPlayer = new Greedy(boardSize);
 
     public static int boardSizePixels = 900;
     public static int tileSize = boardSizePixels/boardSize;
@@ -60,11 +60,11 @@ public class Reversi extends Application
        
         root = drawBoard(root);
 
-        t.setFont(new Font(40));
-        t.setText("White pieces: " + whitePieces + "\nBlack pieces: " + blackPieces);
-        t.setX(1000);
-        t.setY(100);
-        root.getChildren().add(t);
+        pieceText.setFont(new Font(40));
+        pieceText.setText("White pieces: " + whitePieces + "\nBlack pieces: " + blackPieces);
+        pieceText.setX(1000);
+        pieceText.setY(100);
+        root.getChildren().add(pieceText);
 
 
         whosTurn.setFont(new Font(40));
@@ -105,7 +105,7 @@ public class Reversi extends Application
 
     public static void updateText()
     {
-        t.setText("White pieces: " + whitePieces + "\nBlack pieces: " + blackPieces);
+        pieceText.setText("White pieces: " + whitePieces + "\nBlack pieces: " + blackPieces);
         if(turnColour == TileValue.WHITE)
         {
             whosTurn.setText("White's Turn");
@@ -125,9 +125,16 @@ public class Reversi extends Application
             case Random:
                 randomController();
                 break;
+            case Greedy:
+                greedyController();
+                break;
         }
     }
 
+    public static void greedyController()
+    {
+       updateMove(greedyPlayer.returnGreedyMove(legalMoves,board)); 
+    }
 
 
     public static void humanController(MouseEvent event)
@@ -150,7 +157,7 @@ public class Reversi extends Application
             root = printBoard(root);
             calcAndDrawLegalMoves();
             
-            //countPieces();
+        
             checkTurnState();
         }
         else
@@ -173,7 +180,6 @@ public class Reversi extends Application
         
         if (blackStuck== true && whiteStuck == true)
         {
-            countPieces();
             if (whitePieces>blackPieces)
             {
                 System.out.println("White wins");
@@ -221,27 +227,7 @@ public class Reversi extends Application
         }
     }
 
-    public static void countPieces()
-    {
-        whitePieces = 0;
-        blackPieces = 0;
-        for (int x = 0; x<boardSize; x++)
-        {
-            for (int y = 0; y<boardSize; y++)
-            {
-                if(board[y][x] == TileValue.WHITE)
-                {
-                    whitePieces++;
-                }
-                else if(board[y][x] == TileValue.BLACK)
-                {
-                    blackPieces++;
-                }
-            } 
-        }
-        System.out.println("White: " + whitePieces);
-        System.out.println("Black: " + blackPieces);
-    }
+
 
     public static Group drawBoard(Group group)
     {
