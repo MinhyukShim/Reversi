@@ -31,12 +31,13 @@ public class Reversi extends Application
     public static int blackPieces = 2;
 
     public static Players playerBlack = Players.Greedy;
-    public static Players playerWhite = Players.Greedy;
+    public static Players playerWhite = Players.Generous;
 
     public static Random randomPlayer = new Random();
     public static Greedy greedyPlayer = new Greedy(boardSize);
+    public static Generous generousPlayer = new Generous(boardSize);
 
-    public static int boardSizePixels = 900;
+    public static int boardSizePixels = 960;
     public static int tileSize = boardSizePixels/boardSize;
     public static int counterLimit = boardSize*boardSize;
 
@@ -126,9 +127,20 @@ public class Reversi extends Application
             case Greedy:
                 greedyController();
                 break;
+            case Generous:
+                generousController();
+                break;
         }
     }
 
+
+
+    public static void generousController()
+    {
+        System.out.println(legalMoves.size());
+        CoOrd move = generousPlayer.returnGenerousMove(legalMoves,board,turnColour);
+        updateMove(move); 
+    }
     public static void greedyController()
     {
         CoOrd move = greedyPlayer.returnGreedyMove(legalMoves,board,turnColour);

@@ -1,4 +1,4 @@
 public enum Players 
 {
-    Human,Random,Greedy;
+    Human,Random,Greedy,Generous;
 }
