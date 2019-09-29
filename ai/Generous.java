@@ -5,7 +5,7 @@ import ai.CoOrd;
 
 public class Generous
 {
-    public int worstCapture = 100;
+    public int worstCapture = 0;
     public CoOrd worstMove;
     public int currentCapture = 0;
     public TileValue turnColour;
@@ -17,6 +17,7 @@ public class Generous
     public Generous(int boardSize)
     {
         this.boardSize = boardSize;
+        worstCapture=boardSize*boardSize;
     }
 
 
@@ -34,7 +35,7 @@ public class Generous
 
         turnColour=currentTurn;
         updateBoard(newBoard);
-        worstCapture=100;
+        worstCapture=boardSize*boardSize;
         if(legalMoves.size()>0)
         {
             

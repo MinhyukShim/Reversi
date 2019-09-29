@@ -1,8 +1,10 @@
 
-import java.util.ArrayList; 
+import java.util.ArrayList;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Line;
@@ -26,16 +28,18 @@ public class Reversi extends Application
     
     public static Text whosTurn = new Text();
     public static Text pieceText = new Text();
+    public static Alert alert = new Alert(AlertType.INFORMATION);
 
     public static int whitePieces = 2;
     public static int blackPieces = 2;
 
-    public static Players playerBlack = Players.Greedy;
-    public static Players playerWhite = Players.Generous;
+    public static Players playerBlack = Players.CornerSeeker;
+    public static Players playerWhite = Players.GenToGreed;
 
     public static Random randomPlayer = new Random();
     public static Greedy greedyPlayer = new Greedy(boardSize);
     public static Generous generousPlayer = new Generous(boardSize);
+    public static CornerSeeker cornerSeekerPlayer = new CornerSeeker(boardSize);
 
     public static int boardSizePixels = 960;
     public static int tileSize = boardSizePixels/boardSize;
@@ -72,6 +76,8 @@ public class Reversi extends Application
         whosTurn.setY(300);
         root.getChildren().add(whosTurn);
 
+        
+
         initaliseBoard(); 
 
         Scene scene = new Scene(root, 1920,1080);
@@ -90,7 +96,7 @@ public class Reversi extends Application
                 {
                     handleTurn(playerBlack,event);
                 }
-                updateText();
+                
 
 
             }
@@ -130,14 +136,35 @@ public class Reversi extends Application
             case Generous:
                 generousController();
                 break;
+            case GenToGreed:
+                genToGreedController();
+                break;
+            case CornerSeeker:
+                cornerSeekerController();
+
         }
     }
 
-
+    public static void cornerSeekerController()
+    {
+        CoOrd move = cornerSeekerPlayer.returnClosestCornerMove(legalMoves);
+        updateMove(move);
+    }
+    public static void genToGreedController()
+    {
+        if(whitePieces+blackPieces<boardSize*boardSize*0.5)
+        {
+            generousController();
+        }
+        else
+        {
+            greedyController();
+        }
+    }
 
     public static void generousController()
     {
-        System.out.println(legalMoves.size());
+        //System.out.println(legalMoves.size());
         CoOrd move = generousPlayer.returnGenerousMove(legalMoves,board,turnColour);
         updateMove(move); 
     }
@@ -166,6 +193,7 @@ public class Reversi extends Application
         if (updateBoard(move))
         {
             root = printBoard(root);
+            updateText();
             calcAndDrawLegalMoves();
             
         }
@@ -191,14 +219,28 @@ public class Reversi extends Application
             if (whitePieces>blackPieces)
             {
                 System.out.println("White wins");
+                alert.setTitle("White wins");
+                alert.setHeaderText("White wins");
+
+                alert.showAndWait();
             }
             else if (blackPieces>whitePieces)
             {
-                System.out.println("Black wins");   
+                System.out.println("Black wins"); 
+                alert.setTitle("Black wins");
+                alert.setHeaderText("Black wins");
+
+
+                alert.showAndWait();  
             }
             else
             {
                 System.out.println("Draw!");
+                alert.setTitle("Draw");
+                alert.setHeaderText("Draw");
+ 
+
+                alert.showAndWait();
             }
         }
 
