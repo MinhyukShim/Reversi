@@ -9,8 +9,9 @@ import javafx.stage.Stage;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Circle;
-import javafx.scene.Group; 
-import javafx.scene.paint.Color; 
+import javafx.scene.Group;
+import javafx.scene.paint.Color;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.*;
 import ai.*;
@@ -18,6 +19,7 @@ public class Reversi extends Application
 {
     public static int boardSize = 8; 
     public static TileValue[][] board = new TileValue[boardSize][boardSize]; 
+    public static Boolean automaticTurn = true;
     public static ArrayList <CoOrd> legalMoves = new ArrayList<CoOrd>(); 
     public static TileValue turnColour = TileValue.BLACK;
     public static Boolean blackStuck = false;
@@ -25,6 +27,7 @@ public class Reversi extends Application
     
     public static Group root = new Group();
     public static Group legalMovesGroup = new Group();
+    public static Group circleGroup = new Group();
     
     public static Text whosTurn = new Text();
     public static Text pieceText = new Text();
@@ -33,17 +36,17 @@ public class Reversi extends Application
     public static int whitePieces = 2;
     public static int blackPieces = 2;
 
-    public static Players playerBlack = Players.CornerSeeker;
+    public static Players playerBlack = Players.GenToGreed;
     public static Players playerWhite = Players.GenToGreed;
 
     public static Random randomPlayer = new Random();
     public static Greedy greedyPlayer = new Greedy(boardSize);
-    public static Generous generousPlayer = new Generous(boardSize);
+    public static Generous generousPlayer = new  Generous(boardSize);
     public static CornerSeeker cornerSeekerPlayer = new CornerSeeker(boardSize);
 
     public static int boardSizePixels = 960;
-    public static int tileSize = boardSizePixels/boardSize;
-    public static int counterLimit = boardSize*boardSize;
+    public static float tileSize = (float)boardSizePixels/(float)boardSize;
+    public static int counterLimit = boardSize*boardSize;  
 
     public static void main(String[] args)
     {
@@ -101,8 +104,18 @@ public class Reversi extends Application
 
             }
         });
-
-
+        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            public void handle(KeyEvent ke) {
+                if(turnColour==TileValue.WHITE)
+                {
+                    handleTurn(playerWhite,null);
+                }
+                else
+                {
+                    handleTurn(playerBlack,null);
+                }
+            }
+        });
 
 
         
@@ -152,7 +165,7 @@ public class Reversi extends Application
     }
     public static void genToGreedController()
     {
-        if(whitePieces+blackPieces<boardSize*boardSize*0.5)
+        if(whitePieces+blackPieces<counterLimit*0.5)
         {
             generousController();
         }
@@ -192,7 +205,7 @@ public class Reversi extends Application
     {
         if (updateBoard(move))
         {
-            root = printBoard(root);
+            printBoard();
             updateText();
             calcAndDrawLegalMoves();
             
@@ -280,11 +293,13 @@ public class Reversi extends Application
 
     public static Group drawBoard(Group group)
     {
+        
         for (int i =1; i<=boardSize; i++)
         {
-            int lineWidth = 10;
-            Line line = new Line(tileSize*i, 0, tileSize*i, boardSizePixels-(lineWidth/2));
-            Line line2 = new Line(0,tileSize*i, boardSizePixels-(lineWidth/2), tileSize*i);
+            float lineWidth =  (1/(float)boardSize) * (45+boardSize);
+            lineWidth = 2;
+            Line line = new Line(tileSize*i, 0, tileSize*i, boardSizePixels);
+            Line line2 = new Line(0,tileSize*i, boardSizePixels, tileSize*i);
             line.setStrokeWidth(lineWidth);
             line2.setStrokeWidth(lineWidth);
             line.setStroke(Color.rgb(50, 50, 50));
@@ -311,34 +326,37 @@ public class Reversi extends Application
         board[midpoint][midpoint + 1] = TileValue.BLACK; 
         board[midpoint + 1][midpoint] = TileValue.BLACK; 
         board[midpoint + 1][midpoint + 1] = TileValue.WHITE; 
-        root = printBoard(root); 
+        printBoard(); 
         calcAndDrawLegalMoves();
     }
 
-    public static Group printBoard(Group group)
+    public static void printBoard()
     {
+        root.getChildren().removeAll( circleGroup );
+        circleGroup.getChildren().clear();
         for (int y = 0; y < boardSize; y++ )
         {
             for (int x = 0; x < boardSize; x++ )
             {
                 if(board[y][x] == TileValue.WHITE)
                 {
-                    Circle circle = new Circle((x+0.5)*tileSize, (y+0.5)*tileSize, tileSize*0.43); 
+                    Circle circle = new Circle((x+0.5)*tileSize, (y+0.5)*tileSize, tileSize*0.44); 
                     circle.setFill(Color.WHITE);
-                    group.getChildren().add(circle);
+                    circleGroup.getChildren().add(circle);
                 }
                 else if(board[y][x] == TileValue.BLACK)                    
                 {
-                    Circle circle = new Circle((x+0.5)*tileSize, (y+0.5)*tileSize, tileSize*0.43); 
+                    Circle circle = new Circle((x+0.5)*tileSize, (y+0.5)*tileSize, tileSize*0.44); 
                     circle.setFill(Color.BLACK);
-                    group.getChildren().add(circle);
+                    circleGroup.getChildren().add(circle);
                 
                 }
                 //System.out.print(board[y][x] + " ");
             }
             //System.out.println(" ");
         }
-        return group;
+        root.getChildren().add(circleGroup);
+
     }
 
     public static Group displayLegalMoves(Group group)
@@ -349,7 +367,7 @@ public class Reversi extends Application
         {
             for (int i =0; i<legalMoves.size(); i++)
             {
-                Circle circle = new Circle((legalMoves.get(i).first+0.5)*tileSize, (legalMoves.get(i).last+0.5)*tileSize, tileSize*0.43);
+                Circle circle = new Circle((legalMoves.get(i).first+0.5)*tileSize, (legalMoves.get(i).last+0.5)*tileSize, tileSize*0.44);
                 if(turnColour==TileValue.WHITE)
                 {
                     circle.setFill(Color.rgb(255,255,255,0.4));
@@ -397,7 +415,7 @@ public class Reversi extends Application
     public static void addLegalMove(CoOrd move)
     {
 
-        //might need to change the legalMoves data structure to a set to as the contains function will take much longer when scaled upwards
+        //might need to change the legalMoves data structure to a hashed set to as the contains function will take much longer when scaled upwards
         if(move != null && !legalMoves.contains(move))
         {
             legalMoves.add(move);
@@ -459,8 +477,8 @@ public class Reversi extends Application
 
     public static CoOrd mousePositionToCoOrds(double x, double y)
     {
-        int tileX = (int)x/tileSize;
-        int tileY = (int)y/tileSize;
+        int tileX = (int)(x/(double)tileSize);
+        int tileY = (int)(y/(double)tileSize);
 
         return new CoOrd(tileX, tileY);
     }

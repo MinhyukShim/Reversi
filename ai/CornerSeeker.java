@@ -43,11 +43,10 @@ public class CornerSeeker
         {
             int distance = returnShortestDistance(legalMoves.get(i));
             distanceNumber.add(distance);
-            System.out.println("distaince: " + distance);
             if(distance<shortestDistance)
             {
                 shortestDistance = distance;
-                System.out.println(shortestDistance);
+               
             }
         }
         for (int i=0; i <legalMoves.size();i++)
@@ -55,7 +54,6 @@ public class CornerSeeker
             if(distanceNumber.get(i) == shortestDistance)
             {
                 bestMoves.add(legalMoves.get(i));
-                System.out.println("added");
             }
         }
 
@@ -64,7 +62,6 @@ public class CornerSeeker
         {
           
             int numberOfMoves = bestMoves.size();
-            System.out.println(numberOfMoves);
             int x = (int)(Math.random()*(numberOfMoves));
             return bestMoves.get(x);
             
