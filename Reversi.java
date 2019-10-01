@@ -19,7 +19,6 @@ public class Reversi extends Application
 {
     public static int boardSize = 8; 
     public static TileValue[][] board = new TileValue[boardSize][boardSize]; 
-    public static Boolean automaticTurn = true;
     public static ArrayList <CoOrd> legalMoves = new ArrayList<CoOrd>(); 
     public static TileValue turnColour = TileValue.BLACK;
     public static Boolean blackStuck = false;
