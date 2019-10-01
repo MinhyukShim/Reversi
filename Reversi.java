@@ -11,10 +11,12 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Circle;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.*;
 import ai.*;
+
 public class Reversi extends Application
 {
     public static int boardSize = 8; 
@@ -35,8 +37,8 @@ public class Reversi extends Application
     public static int whitePieces = 2;
     public static int blackPieces = 2;
 
-    public static Players playerBlack = Players.GenToGreed;
-    public static Players playerWhite = Players.GenToGreed;
+    public static Players playerBlack = Players.Greedy;
+    public static Players playerWhite = Players.HalfGenHalfGreed;
 
     public static Random randomPlayer = new Random();
     public static Greedy greedyPlayer = new Greedy(boardSize);
@@ -105,13 +107,16 @@ public class Reversi extends Application
         });
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
             public void handle(KeyEvent ke) {
-                if(turnColour==TileValue.WHITE)
+                if(ke.getCode() == KeyCode.SPACE)
                 {
-                    handleTurn(playerWhite,null);
-                }
-                else
-                {
-                    handleTurn(playerBlack,null);
+                    if(turnColour==TileValue.WHITE)
+                    {
+                        handleTurn(playerWhite,null);
+                    }
+                    else
+                    {
+                        handleTurn(playerBlack,null);
+                    }
                 }
             }
         });
@@ -151,12 +156,40 @@ public class Reversi extends Application
             case GenToGreed:
                 genToGreedController();
                 break;
+            case ThreeDeepGreedy:
+                break;
             case CornerSeeker:
                 cornerSeekerController();
+                break;
+            case HalfGenHalfGreed:
+                halfGenHalfGreedController();
+                break;
+
+            
 
         }
     }
 
+    public static void halfGenHalfGreedController()
+    {
+        int x = (int)(Math.random()*(2));
+        System.out.println(x);
+        if(x==0)
+        {
+            
+            generousController();
+        }
+        else
+        {
+           
+            greedyController();
+        }
+    }
+
+
+
+    
+    
     public static void cornerSeekerController()
     {
         CoOrd move = cornerSeekerPlayer.returnClosestCornerMove(legalMoves);
